@@ -61,7 +61,39 @@ public class mainService extends HttpServlet {
             String command = tools.functions.jsonget(job, "command");
             System.out.println("command=" + command);
 
-            if (command.equals("addtemplate")) {
+            if (command.equals("smstemplate")) {
+// smstemplate
+
+                String qwr = "select id,messagetxt from messagetemplate";
+                System.out.println("qwr=" + qwr);
+
+                ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
+                String ss = "{\n\"command\":\"smstemplate\",\n";
+                if (s2.size() > 0) {
+                    ss += "\"result\":\"ok\",\n "
+                            + " \"smstable\": [\n";
+                    int i = 1;
+                    for (String[] s22 : s2) {
+
+                        ss += "{\"id\":\"" + s22[0] + "\",\n"
+                                + "\"txt\":\"" + s22[1] + "\"\n}";
+                        if (i < s2.size()) {
+                            ss += ",\n";
+//                            System.out.println("Kuku=" + s22.length);
+//                            System.out.println("i=" + i);
+                        }
+                        System.out.println("i=" + i);
+                        i = i + 1;
+
+                    }
+                    ss += "\n]\n}";
+                } else {
+                    ss = "{\n\"command\":\"smstemplate\",\n"
+                            + "\"result\":\"noTemplates\"\n}";
+                }
+                System.out.println("ss=" + ss);
+                response.getWriter().write(ss);
+            } else if (command.equals("addtemplate")) {
 // addtemplate
 
                 String usernumber = tools.functions.jsonget(job, "usernumber");
