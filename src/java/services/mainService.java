@@ -236,20 +236,32 @@ public class mainService extends HttpServlet {
 
                 String usernumber = tools.functions.jsonget(job, "usernumber");
                 System.out.println("usernumber=" + usernumber);
-                String qwr = "select usernumber,usermobile,name from user2subscriber where subscribernumber='" + usernumber + "'";
+                String qwr = "select subscribernumber from user2subscriber where usernumber='" + usernumber + "'";
                 System.out.println("qwr=" + qwr);
 
-                ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
-                String ss;
-                if (s2.size() > 0) {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
-                            + "\"result\":\"ok\",\n"
-                            + "\"usernumber\":\"" + s2.get(0)[0] + "\",\n"
-                            + "\"usermobile\":\"" + s2.get(0)[1] + "\",\n"
-                            + "\"name\":\"" + s2.get(0)[2] + "\"\n}";
 
+                ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
+                String ss = "{\n\"command\":\"numberlist\",\n";
+                if (s2.size() > 0) {
+                    ss += "\"result\":\"ok\",\n "
+                            + " \"numberlist\": [\n";
+                    int i = 1;
+                    for (String[] s22 : s2) {
+
+            //            ss += "{\"subscribernumber\":\"" + s22[0] + "\",\n"
+                         ss +=  "{ \"subscribernumber\":\"" + s22[0] + "\"\n}";
+                        if (i < s2.size()) {
+                            ss += ",\n";
+//                            System.out.println("Kuku=" + s22.length);
+//                            System.out.println("i=" + i);
+                        }
+                        System.out.println("i=" + i);
+                        i = i + 1;
+
+                    }
+                    ss += "\n]\n}";
                 } else {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
+                    ss = "{\n\"command\":\"numberlist\",\n"
                             + "\"result\":\"usernotfound\"\n}";
                 }
                 System.out.println("ss=" + ss);
@@ -259,21 +271,35 @@ public class mainService extends HttpServlet {
 
                 String usernumber = tools.functions.jsonget(job, "usernumber");
                 System.out.println("usernumber=" + usernumber);
-                String qwr = "select usernumber,usermobile,name from user2subscriber where subscribernumber='" + usernumber + "'";
+                String qwr = "select usernumber,bnumber,text from messages_log where usernumber='" + usernumber + "'";
+
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
-                String ss;
+                String ss = "{\n\"command\":\"getsmstable\",\n";
                 if (s2.size() > 0) {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
-                            + "\"result\":\"ok\",\n"
-                            + "\"usernumber\":\"" + s2.get(0)[0] + "\",\n"
-                            + "\"usermobile\":\"" + s2.get(0)[1] + "\",\n"
-                            + "\"name\":\"" + s2.get(0)[2] + "\"\n}";
+                    ss += "\"result\":\"ok\",\n "
+                            + " \"smstable\": [\n";
+                    int i = 1;
+                    for (String[] s22 : s2) {
 
+                        ss += "{\"usernumber\":\"" + s22[0] + "\",\n"
+                                + "\"bnumber\":\"" + s22[1] + "\"\n"
+                                + "\"senddate\":\"" + s22[1] + "\"\n"
+                                + "\"text\":\"" + s22[2] + "\"\n}";
+                        if (i < s2.size()) {
+                            ss += ",\n";
+//                            System.out.println("Kuku=" + s22.length);
+//                            System.out.println("i=" + i);
+                        }
+                        System.out.println("i=" + i);
+                        i = i + 1;
+
+                    }
+                    ss += "\n]\n}";
                 } else {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
-                            + "\"result\":\"usernotfound\"\n}";
+                    ss = "{\n\"command\":\"getsmstable\",\n"
+                            + "\"result\":\"no results\"\n}";
                 }
                 System.out.println("ss=" + ss);
                 response.getWriter().write(ss);
