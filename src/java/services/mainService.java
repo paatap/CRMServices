@@ -61,17 +61,17 @@ public class mainService extends HttpServlet {
             String command = tools.functions.jsonget(job, "command");
             System.out.println("command=" + command);
 
-            if (command.equals("smstemplate")) {
+            if (command.equals("smstemplates")) {
 // smstemplate
 
                 String qwr = "select id,messagetxt from messagetemplate";
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
-                String ss = "{\n\"command\":\"smstemplate\",\n";
+                String ss = "{\n\"command\":\"smstemplates\",\n";
                 if (s2.size() > 0) {
                     ss += "\"result\":\"ok\",\n "
-                            + " \"smstable\": [\n";
+                            + " \"smstemplates\": [\n";
                     int i = 1;
                     for (String[] s22 : s2) {
 
@@ -88,7 +88,7 @@ public class mainService extends HttpServlet {
                     }
                     ss += "\n]\n}";
                 } else {
-                    ss = "{\n\"command\":\"smstemplate\",\n"
+                    ss = "{\n\"command\":\"smstemplates\",\n"
                             + "\"result\":\"noTemplates\"\n}";
                 }
                 System.out.println("ss=" + ss);
@@ -187,7 +187,7 @@ public class mainService extends HttpServlet {
 
   
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
-                String ss = "{\n\"command\":\"getsmstable\",\n";
+                String ss = "{\n\"command\":\"getcustomers\",\n";
                 if (s2.size() > 0) {
                     ss += "\"result\":\"ok\",\n "
                             + " \"smstable\": [\n";
@@ -257,7 +257,7 @@ public class mainService extends HttpServlet {
                     for (String[] s22 : s2) {
 
                         //            ss += "{\"subscribernumber\":\"" + s22[0] + "\",\n"
-                        ss += "{ \"subscribernumber\":\"" + s22[0] + "\"\n}";
+                        ss += "{ \"anumber\":\"" + s22[0] + "\"\n}";
                         if (i < s2.size()) {
                             ss += ",\n";
 //                            System.out.println("Kuku=" + s22.length);
@@ -279,7 +279,7 @@ public class mainService extends HttpServlet {
 
                 String usernumber = tools.functions.jsonget(job, "usernumber");
                 System.out.println("usernumber=" + usernumber);
-                String qwr = "select usernumber,bnumber,text from messages_log where usernumber='" + usernumber + "'";
+                String qwr = "select bnumber,text,date_trunc('second',senddate) from messages_log where usernumber='" + usernumber + "'";
 
                 System.out.println("qwr=" + qwr);
 
@@ -291,10 +291,9 @@ public class mainService extends HttpServlet {
                     int i = 1;
                     for (String[] s22 : s2) {
 
-                        ss += "{\"usernumber\":\"" + s22[0] + "\",\n"
-                                + "\"bnumber\":\"" + s22[1] + "\"\n"
-                                + "\"senddate\":\"" + s22[1] + "\"\n"
-                                + "\"text\":\"" + s22[2] + "\"\n}";
+                        ss += "{\"bnumber\":\"" + s22[0] + "\",\n"                         
+                                + "\"txt\":\"" + s22[1] + "\",\n"
+                                + "\"senddate\":\"" + s22[2] + "\"\n}";
                         if (i < s2.size()) {
                             ss += ",\n";
 //                            System.out.println("Kuku=" + s22.length);
