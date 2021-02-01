@@ -96,46 +96,60 @@ public class mainService extends HttpServlet {
             } else if (command.equals("addtemplate")) {
 // addtemplate
 
-                String usernumber = tools.functions.jsonget(job, "usernumber");
-                System.out.println("usernumber=" + usernumber);
-                String qwr = "select usernumber,usermobile,name from user2subscriber where subscribernumber='" + usernumber + "'";
+                String text = tools.functions.jsonget(job, "text");
+                System.out.println("text=" + text);
+                String qwr = "insert into  messagetemplate (messagetxt) values ('" + text + "')returning id" ;
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
                 String ss;
                 if (s2.size() > 0) {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
-                            + "\"result\":\"ok\",\n"
-                            + "\"usernumber\":\"" + s2.get(0)[0] + "\",\n"
-                            + "\"usermobile\":\"" + s2.get(0)[1] + "\",\n"
-                            + "\"name\":\"" + s2.get(0)[2] + "\"\n}";
+                    ss = "{\n\"command\":\"addtemplate\",\n"
+                            + "\"result\":\"ok\"\n}";
 
                 } else {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
-                            + "\"result\":\"usernotfound\"\n}";
+                    ss = "{\n\"command\":\"addtemplate\",\n"
+                            + "\"result\":\"notsaved\"\n}";
+                }
+                System.out.println("ss=" + ss);
+                response.getWriter().write(ss);
+            } else if (command.equals("changetemplate")) {
+// changetemplate
+
+                String id = tools.functions.jsonget(job, "id");
+                System.out.println("id=" + id);
+                String text = tools.functions.jsonget(job, "text");
+                System.out.println("text=" + text);
+                String qwr = "update  messagetemplate set messagetxt= '" + text + "' where id=" + id+"returning id" ;
+                System.out.println("qwr=" + qwr);
+
+                ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
+                String ss;
+                if (s2.size() > 0) {
+                    ss = "{\n\"command\":\"changetemplate\",\n"
+                            + "\"result\":\"ok\"\n}";
+                } else {
+                    ss = "{\n\"command\":\"changetemplate\",\n"
+                            + "\"result\":\"templatenotfound\"\n}";
                 }
                 System.out.println("ss=" + ss);
                 response.getWriter().write(ss);
             } else if (command.equals("deletetemplate")) {
 // deletetemplate
 
-                String usernumber = tools.functions.jsonget(job, "usernumber");
-                System.out.println("usernumber=" + usernumber);
-                String qwr = "select usernumber,usermobile,name from user2subscriber where subscribernumber='" + usernumber + "'";
+               String id = tools.functions.jsonget(job, "id");
+                System.out.println("id=" + id);
+                String qwr = "update  messagetemplate set activem= false where id=" + id+"returning id" ;
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
                 String ss;
                 if (s2.size() > 0) {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
-                            + "\"result\":\"ok\",\n"
-                            + "\"usernumber\":\"" + s2.get(0)[0] + "\",\n"
-                            + "\"usermobile\":\"" + s2.get(0)[1] + "\",\n"
-                            + "\"name\":\"" + s2.get(0)[2] + "\"\n}";
-
+                    ss = "{\n\"command\":\"deletetemplate\",\n"
+                            + "\"result\":\"ok\"\n}";
                 } else {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
-                            + "\"result\":\"usernotfound\"\n}";
+                    ss = "{\n\"command\":\"deletetemplate\",\n"
+                            + "\"result\":\"templatenotfound\"\n}";
                 }
                 System.out.println("ss=" + ss);
                 response.getWriter().write(ss);
@@ -144,20 +158,21 @@ public class mainService extends HttpServlet {
 
                 String usernumber = tools.functions.jsonget(job, "usernumber");
                 System.out.println("usernumber=" + usernumber);
-                String qwr = "select usernumber,usermobile,name from user2subscriber where subscribernumber='" + usernumber + "'";
+                String anumber = tools.functions.jsonget(job, "anumber");
+                System.out.println("anumber=" + anumber);
+                 String name = tools.functions.jsonget(job, "name");
+                System.out.println("name=" + name);
+                String qwr = "update user2subscriber set usernumber='"+usernumber+"',name='"+name+"'where subscribernumber='" + anumber+ "'returning id";
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
                 String ss;
                 if (s2.size() > 0) {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
-                            + "\"result\":\"ok\",\n"
-                            + "\"usernumber\":\"" + s2.get(0)[0] + "\",\n"
-                            + "\"usermobile\":\"" + s2.get(0)[1] + "\",\n"
-                            + "\"name\":\"" + s2.get(0)[2] + "\"\n}";
+                    ss = "{\n\"command\":\"changecustomer\",\n"
+                   + "\"result\":\"ok\"\n}";
 
                 } else {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
+                    ss = "{\n\"command\":\"changecustomer\",\n"
                             + "\"result\":\"usernotfound\"\n}";
                 }
                 System.out.println("ss=" + ss);
@@ -165,45 +180,35 @@ public class mainService extends HttpServlet {
             } else if (command.equals("getcustomers")) {
 // getcustomers
 
-                String usernumber = tools.functions.jsonget(job, "usernumber");
+                 String usernumber = tools.functions.jsonget(job, "usernumber");
                 System.out.println("usernumber=" + usernumber);
-                String qwr = "select usernumber,usermobile,name from user2subscriber where subscribernumber='" + usernumber + "'";
+                String qwr = "select usernumber,subscribernumber,name from user2subscriber where usernumber='" + usernumber + "'";
                 System.out.println("qwr=" + qwr);
 
+  
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
-                String ss;
+                String ss = "{\n\"command\":\"getsmstable\",\n";
                 if (s2.size() > 0) {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
-                            + "\"result\":\"ok\",\n"
-                            + "\"usernumber\":\"" + s2.get(0)[0] + "\",\n"
-                            + "\"usermobile\":\"" + s2.get(0)[1] + "\",\n"
-                            + "\"name\":\"" + s2.get(0)[2] + "\"\n}";
+                    ss += "\"result\":\"ok\",\n "
+                            + " \"smstable\": [\n";
+                    int i = 1;
+                    for (String[] s22 : s2) {
 
+                        ss += "{\"usernumber\":\"" + s22[0] + "\",\n"
+                                + "\"bnumber\":\"" + s22[1] + "\"\n"
+                                + "\"name\":\"" + s22[2] + "\"\n}";
+                        if (i < s2.size()) {
+                            ss += ",\n";
+//                            System.out.println("Kuku=" + s22.length);
+//                            System.out.println("i=" + i);
+                        }
+                        System.out.println("i=" + i);
+                        i = i + 1;
+
+                    }
+                    ss += "\n]\n}";
                 } else {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
-                            + "\"result\":\"usernotfound\"\n}";
-                }
-                System.out.println("ss=" + ss);
-                response.getWriter().write(ss);
-            } else if (command.equals("changetemplate")) {
-// changetemplate
-
-                String usernumber = tools.functions.jsonget(job, "usernumber");
-                System.out.println("usernumber=" + usernumber);
-                String qwr = "select usernumber,usermobile,name from user2subscriber where subscribernumber='" + usernumber + "'";
-                System.out.println("qwr=" + qwr);
-
-                ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
-                String ss;
-                if (s2.size() > 0) {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
-                            + "\"result\":\"ok\",\n"
-                            + "\"usernumber\":\"" + s2.get(0)[0] + "\",\n"
-                            + "\"usermobile\":\"" + s2.get(0)[1] + "\",\n"
-                            + "\"name\":\"" + s2.get(0)[2] + "\"\n}";
-
-                } else {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
+                    ss = "{\n\"command\":\"getcustomers\",\n"
                             + "\"result\":\"usernotfound\"\n}";
                 }
                 System.out.println("ss=" + ss);
@@ -213,21 +218,25 @@ public class mainService extends HttpServlet {
 
                 String usernumber = tools.functions.jsonget(job, "usernumber");
                 System.out.println("usernumber=" + usernumber);
-                String qwr = "select usernumber,usermobile,name from user2subscriber where subscribernumber='" + usernumber + "'";
+                String bnumber = tools.functions.jsonget(job, "bnumber");
+                System.out.println("bnumber=" + bnumber);
+                String template_id = tools.functions.jsonget(job, "template_id");
+                System.out.println("template_id=" + template_id);
+                String smstext = tools.functions.jsonget(job, "smstext");
+                System.out.println("smstext=" + smstext);
+
+                String qwr = "insert into messages_log (usernumber,bnumber,template_id,text)values('" + usernumber + "','" + bnumber + "','" + template_id + "','" + smstext + "') returning id";
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
                 String ss;
                 if (s2.size() > 0) {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
-                            + "\"result\":\"ok\",\n"
-                            + "\"usernumber\":\"" + s2.get(0)[0] + "\",\n"
-                            + "\"usermobile\":\"" + s2.get(0)[1] + "\",\n"
-                            + "\"name\":\"" + s2.get(0)[2] + "\"\n}";
+                    ss = "{\n\"command\":\"sendsms\",\n"
+                            + "\"result\":\"ok\"\n}";
 
                 } else {
-                    ss = "{\n\"command\":\"incomingcall\",\n"
-                            + "\"result\":\"usernotfound\"\n}";
+                    ss = "{\n\"command\":\"sendsms\",\n"
+                            + "\"result\":\"notSaved\"\n}";
                 }
                 System.out.println("ss=" + ss);
                 response.getWriter().write(ss);
@@ -239,7 +248,6 @@ public class mainService extends HttpServlet {
                 String qwr = "select subscribernumber from user2subscriber where usernumber='" + usernumber + "'";
                 System.out.println("qwr=" + qwr);
 
-
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
                 String ss = "{\n\"command\":\"numberlist\",\n";
                 if (s2.size() > 0) {
@@ -248,8 +256,8 @@ public class mainService extends HttpServlet {
                     int i = 1;
                     for (String[] s22 : s2) {
 
-            //            ss += "{\"subscribernumber\":\"" + s22[0] + "\",\n"
-                         ss +=  "{ \"subscribernumber\":\"" + s22[0] + "\"\n}";
+                        //            ss += "{\"subscribernumber\":\"" + s22[0] + "\",\n"
+                        ss += "{ \"subscribernumber\":\"" + s22[0] + "\"\n}";
                         if (i < s2.size()) {
                             ss += ",\n";
 //                            System.out.println("Kuku=" + s22.length);
