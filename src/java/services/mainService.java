@@ -61,10 +61,67 @@ public class mainService extends HttpServlet {
             String command = tools.functions.jsonget(job, "command");
             System.out.println("command=" + command);
 
-            if (command.equals("smstemplates")) {
+           if (command.equals("missed")) {
+// missed
+                String anumber = tools.functions.jsonget(job, "anumber");
+                System.out.println("anumber=" + anumber);
+                String agent = tools.functions.jsonget(job, "agent");
+                System.out.println("agent=" + agent);
+                String qwr = "insert into missedcalls (anumber,agentname)values('"  + anumber + "','" + agent + "') returning id";
+                System.out.println("qwr=" + qwr);
+                ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
+                String ss;
+                if (s2.size() > 0) {
+                    ss = "{\n\"command\":\"missed\",\n"
+                            + "\"result\":\"ok\",\n"
+                            + "\"id\":\"" + s2.get(0)[0] + "\"\n}";
+                } else {
+                    ss = "{\n\"command\":\"missed\",\n"
+                            + "\"result\":\"usernotfound\"\n}";
+                }
+                System.out.println("ss=" + ss);
+                response.getWriter().write(ss);
+            } else if (command.equals("missedcalls")) {
+// missedcalllist
+
+                String agent = tools.functions.jsonget(job, "agent");
+                System.out.println("agent=" + agent);
+
+                String qwr = "select id,agentname,usernumber,anumber,startdate from missedcalls where agentname='" + agent + "' order by startdate";
+                System.out.println("qwr=" + qwr);
+
+                ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
+                String ss = "{\n\"command\":\"missedcalls\",\n";
+                if (s2.size() > 0) {
+                    ss += "\"result\":\"ok\",\n "
+                            + " \"missedcalls\": [\n";
+                    int i = 1;
+                    for (String[] s22 : s2) {
+
+                        ss += "{\"id\":\"" + s22[0] + "\",\n"
+                                ////////////////////////////////
+                                + "\"anumber\":\"" + s22[3] + "\",\n"
+                                + "\"date\":\"" + s22[4] + "\"\n}";
+                        if (i < s2.size()) {
+                            ss += ",\n";
+//                            System.out.println("Kuku=" + s22.length);
+//                            System.out.println("i=" + i);
+                        }
+                        System.out.println("i=" + i);
+                        i = i + 1;
+
+                    }
+                    ss += "\n]\n}";
+                } else {
+                    ss = "{\n\"command\":\"missedcalls\",\n"
+                            + "\"result\":\"nocalls\"\n}";
+                }
+                System.out.println("ss=" + ss);
+                response.getWriter().write(ss);
+            } else if (command.equals("smstemplates")) {
 // smstemplate
 
-                String qwr = "select id,messagetxt from messagetemplate";
+                String qwr = "select id,messagetxt from messagetemplate where activem=true order by id";
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
@@ -98,7 +155,7 @@ public class mainService extends HttpServlet {
 
                 String text = tools.functions.jsonget(job, "text");
                 System.out.println("text=" + text);
-                String qwr = "insert into  messagetemplate (messagetxt) values ('" + text + "')returning id" ;
+                String qwr = "insert into  messagetemplate (messagetxt) values ('" + text + "')returning id";
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
@@ -120,7 +177,7 @@ public class mainService extends HttpServlet {
                 System.out.println("id=" + id);
                 String text = tools.functions.jsonget(job, "text");
                 System.out.println("text=" + text);
-                String qwr = "update  messagetemplate set messagetxt= '" + text + "' where id=" + id+"returning id" ;
+                String qwr = "update  messagetemplate set messagetxt= '" + text + "' where id=" + id + "returning id";
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
@@ -137,9 +194,9 @@ public class mainService extends HttpServlet {
             } else if (command.equals("deletetemplate")) {
 // deletetemplate
 
-               String id = tools.functions.jsonget(job, "id");
+                String id = tools.functions.jsonget(job, "id");
                 System.out.println("id=" + id);
-                String qwr = "update  messagetemplate set activem= false where id=" + id+"returning id" ;
+                String qwr = "update  messagetemplate set activem= false where id=" + id + "returning id";
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
@@ -158,18 +215,23 @@ public class mainService extends HttpServlet {
 
                 String usernumber = tools.functions.jsonget(job, "usernumber");
                 System.out.println("usernumber=" + usernumber);
-                String anumber = tools.functions.jsonget(job, "anumber");
-                System.out.println("anumber=" + anumber);
-                 String name = tools.functions.jsonget(job, "name");
-                System.out.println("name=" + name);
-                String qwr = "update user2subscriber set usernumber='"+usernumber+"',name='"+name+"'where subscribernumber='" + anumber+ "'returning id";
+                String agent = tools.functions.jsonget(job, "agent");
+                System.out.println("agent=" + agent);
+                String saveusernumber = tools.functions.jsonget(job, "saveusernumber");
+                System.out.println("saveusernumber=" + saveusernumber);
+                String saveagent = tools.functions.jsonget(job, "saveagent");
+                System.out.println("saveagent=" + saveagent);
+                String savecustomernumber = tools.functions.jsonget(job, "savecustomernumber");
+                System.out.println("savecustomernumber=" + savecustomernumber);               
+                               
+                String qwr = "update user2subscriber set usernumber='" + saveusernumber + "',agentname='" + saveagent + "'where subscribernumber='" + savecustomernumber + "'returning id";
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
                 String ss;
                 if (s2.size() > 0) {
                     ss = "{\n\"command\":\"changecustomer\",\n"
-                   + "\"result\":\"ok\"\n}";
+                            + "\"result\":\"ok\"\n}";
 
                 } else {
                     ss = "{\n\"command\":\"changecustomer\",\n"
@@ -180,22 +242,24 @@ public class mainService extends HttpServlet {
             } else if (command.equals("getcustomers")) {
 // getcustomers
 
-                 String usernumber = tools.functions.jsonget(job, "usernumber");
+                String usernumber = tools.functions.jsonget(job, "usernumber");
                 System.out.println("usernumber=" + usernumber);
-                String qwr = "select usernumber,subscribernumber,name from user2subscriber where usernumber='" + usernumber + "'";
+                String agent = tools.functions.jsonget(job, "agent");
+                System.out.println("agent=" + agent);
+                String qwr = "select usernumber,subscribernumber,agentname from user2subscriber order by agentame,subscribernumber,";
+                      //  + "-- where agentname='" + agent + "'";
                 System.out.println("qwr=" + qwr);
 
-  
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
                 String ss = "{\n\"command\":\"getcustomers\",\n";
                 if (s2.size() > 0) {
                     ss += "\"result\":\"ok\",\n "
-                            + " \"smstable\": [\n";
+                            + " \"table\": [\n";
                     int i = 1;
                     for (String[] s22 : s2) {
 
                         ss += "{\"usernumber\":\"" + s22[0] + "\",\n"
-                                + "\"bnumber\":\"" + s22[1] + "\"\n"
+                                + "\"bnumber\":\"" + s22[1] + "\",\n"
                                 + "\"name\":\"" + s22[2] + "\"\n}";
                         if (i < s2.size()) {
                             ss += ",\n";
@@ -220,12 +284,18 @@ public class mainService extends HttpServlet {
                 System.out.println("usernumber=" + usernumber);
                 String bnumber = tools.functions.jsonget(job, "bnumber");
                 System.out.println("bnumber=" + bnumber);
+                String agent = tools.functions.jsonget(job, "agent");
+                System.out.println("agent=" + agent);
                 String template_id = tools.functions.jsonget(job, "template_id");
                 System.out.println("template_id=" + template_id);
+                if (template_id == null || template_id.equals("")) {
+                    template_id = "-1";
+                }
+
                 String smstext = tools.functions.jsonget(job, "smstext");
                 System.out.println("smstext=" + smstext);
 
-                String qwr = "insert into messages_log (usernumber,bnumber,template_id,text)values('" + usernumber + "','" + bnumber + "','" + template_id + "','" + smstext + "') returning id";
+                String qwr = "insert into messages_log (usernumber,bnumber,template_id,text,agentname)values('" + usernumber + "','" + bnumber + "','" + template_id + "','" + smstext + "','" + agent + "') returning id";
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
@@ -263,7 +333,7 @@ public class mainService extends HttpServlet {
 //                            System.out.println("Kuku=" + s22.length);
 //                            System.out.println("i=" + i);
                         }
-                        System.out.println("i=" + i);
+                        //    System.out.println("i=" + i);
                         i = i + 1;
 
                     }
@@ -278,8 +348,9 @@ public class mainService extends HttpServlet {
 // getsmstable
 
                 String usernumber = tools.functions.jsonget(job, "usernumber");
+                String agent = tools.functions.jsonget(job, "agent");
                 System.out.println("usernumber=" + usernumber);
-                String qwr = "select bnumber,text,date_trunc('second',senddate) from messages_log where usernumber='" + usernumber + "'";
+                String qwr = "select bnumber,text,date_trunc('second',senddate),agentname from messages_log where agentname='" + agent + "' order by senddate desc limit 20";
 
                 System.out.println("qwr=" + qwr);
 
@@ -291,15 +362,16 @@ public class mainService extends HttpServlet {
                     int i = 1;
                     for (String[] s22 : s2) {
 
-                        ss += "{\"bnumber\":\"" + s22[0] + "\",\n"                         
+                        ss += "{\"bnumber\":\"" + s22[0] + "\",\n"
                                 + "\"txt\":\"" + s22[1] + "\",\n"
+                                + "\"agent\":\"" + s22[3] + "\",\n"
                                 + "\"senddate\":\"" + s22[2] + "\"\n}";
                         if (i < s2.size()) {
                             ss += ",\n";
 //                            System.out.println("Kuku=" + s22.length);
 //                            System.out.println("i=" + i);
                         }
-                        System.out.println("i=" + i);
+                        //                System.out.println("i=" + i);
                         i = i + 1;
 
                     }
@@ -315,7 +387,7 @@ public class mainService extends HttpServlet {
 
                 String anumber = tools.functions.jsonget(job, "anumber");
                 System.out.println("anumber=" + anumber);
-                String qwr = "select usernumber,usermobile,name from user2subscriber where subscribernumber='" + anumber + "'";
+                String qwr = "select usermobile,agentname from user2subscriber where subscribernumber='" + anumber + "'";
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
@@ -324,8 +396,7 @@ public class mainService extends HttpServlet {
                     ss = "{\n\"command\":\"incomingcall\",\n"
                             + "\"result\":\"ok\",\n"
                             + "\"usernumber\":\"" + s2.get(0)[0] + "\",\n"
-                            + "\"usermobile\":\"" + s2.get(0)[1] + "\",\n"
-                            + "\"name\":\"" + s2.get(0)[2] + "\"\n}";
+                            + "\"agent\":\"" + s2.get(0)[1] + "\"\n}";
 
                 } else {
                     ss = "{\n\"command\":\"incomingcall\",\n"
@@ -339,9 +410,9 @@ public class mainService extends HttpServlet {
                 System.out.println("usernumber=" + usernumber);
                 String anumber = tools.functions.jsonget(job, "anumber");
                 System.out.println("anumber=" + anumber);
-                String name = tools.functions.jsonget(job, "name");
-                System.out.println("name=" + name);
-                String qwr = "insert into user2subscriber (usernumber,subscribernumber,name)values('" + usernumber + "','" + anumber + "','" + name + "') returning id";
+                String agent = tools.functions.jsonget(job, "agent");
+                System.out.println("agent=" + agent);
+                String qwr = "insert into user2subscriber (usernumber,subscribernumber,agentname)values('" + usernumber + "','" + anumber + "','" + agent + "') returning id";
                 System.out.println("qwr=" + qwr);
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
                 String ss;
