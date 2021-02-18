@@ -246,7 +246,7 @@ public class mainService extends HttpServlet {
                 System.out.println("usernumber=" + usernumber);
                 String agent = tools.functions.jsonget(job, "agent");
                 System.out.println("agent=" + agent);
-                String qwr = "select usernumber,subscribernumber,agentname from user2subscriber order by agentame,subscribernumber,";
+                String qwr = "select usernumber,subscribernumber,agentname from user2subscriber order by agentname,subscribernumber";
                       //  + "-- where agentname='" + agent + "'";
                 System.out.println("qwr=" + qwr);
 
