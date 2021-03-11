@@ -15,7 +15,9 @@ import java.sql.Statement;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -312,20 +314,24 @@ public class mainService extends HttpServlet {
                 response.getWriter().write(ss);
 
                 JsonObject ob = null;
+                Date date = new Date();
+                SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                System.out.println(formatter.format(date));
+                String ddt=date.toString();
 
                 String smsbodytext = "{\n"
                         + "\"Body\":  \"MessageBody\",\n"
                         + "    \"SourceInfo\":  {\n"
-                        + "                       \"Date\":  \"DateTime\"\n"
+                        + "                       \""+ddt+"\":  \"DateTime\"\n"
                         + "                   },\n"
                         + "    \"MessageType\":  \"SMS\",\n"
-                        + "    \"Subject\":  \"smssubject\",\n"
+                        + "    \"Subject\":  \"" + smstext + "\",\n"
                         + "    \"System\":  \"CiscoMedical\",\n"
-                        + "    \"Recipients\":  \"994505005050\"\n"
+                        + "    \"Recipients\":  \"" + bnumber + "\"\n"
                         + "}";
-                System.out.println("smsbodytext="+smsbodytext);
-                ob=tools.SendSMS.getjson(smsbodytext, request);
-       
+                System.out.println("smsbodytext=" + smsbodytext);
+                ob = tools.SendSMS.getjson(smsbodytext, request);
+                
 
             } else if (command.equals("numberlist")) {
 // numberlist
