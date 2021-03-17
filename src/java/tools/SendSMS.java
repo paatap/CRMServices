@@ -8,7 +8,13 @@ package tools;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.client.config.RequestConfig;
@@ -20,65 +26,121 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.impl.client.HttpClientBuilder;
 /**
  *
  * @author paata
  */
 public class SendSMS {
 
-    static JsonElement request(HttpRequestBase http, HttpServletRequest request, boolean out) {
-        try {
+     private static String sendPOST(String url,String smsbodytext) throws IOException {
 
-            CloseableHttpClient client = HttpClients.createDefault();
-            //System.out.println("222222222222222222");
-            RequestConfig.Builder requestConfig = RequestConfig.custom();
+        String result = "";
+        HttpPost post = new HttpPost(url);
+//        String smsbodytext = "{\n"
+//                + "\"Body\":  \"Message template 1\",\n"
+//                + "    \"SourceInfo\":  {\n"
+//                + "                       \"Date\":  \"2021-03-17 16:23:52\",\n"
+//                + "                   },\n"
+//                + "    \"MessageType\":  \"SMS\",\n"
+//                + "    \"Subject\":  \"smssubject\",\n"
+//                + "    \"System\":  \"CiscoMedical\",\n"
+//                + "    \"Recipients\":  \"994507903917\"\n"
+//                + "}";
+       
+        StringBuilder json = new StringBuilder();
+        System.out.println("smsbodytext" + smsbodytext);
 
-            requestConfig.setConnectTimeout(5000);
-            requestConfig.setConnectionRequestTimeout(5000);
-            requestConfig.setSocketTimeout(5000);
+        json.append(smsbodytext);
 
-            http.setConfig(requestConfig.build());
+        
+       try{ 
+        post.setEntity(new StringEntity(json.toString()));
+        post.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+         HttpClient client = getHttpClient();
+       
+        HttpResponse response = client.execute(post);
+        result=EntityUtils.toString(response.getEntity());
+        System.out.println(result);
+    }catch (Exception e) {}
+//        try ( CloseableHttpClient httpClient = HttpClients.createDefault();  CloseableHttpResponse response = httpClient.execute(post)) {
+//
+//            result = EntityUtils.toString(response.getEntity());
+//        }
 
-            http.setHeader("Accept", "application/json");
-            http.setHeader("Content-type", "application/json");
-
-            CloseableHttpResponse response = client.execute(http);
-            System.out.println("=code==" + response.getStatusLine().getStatusCode());
-            System.out.println("=reason==" + response.getStatusLine().getReasonPhrase());
-
-            String result = EntityUtils.toString(response.getEntity());
-
-            if (out) {
-                if (result.length() > 1000) {
-                    System.out.println("=result==" + result.substring(0, 1000));
-                } else {
-                    System.out.println("=result==" + result);
+        return result;
+    }
+ private static class SSLUtil {
+ 
+        protected static SSLConnectionSocketFactory getInsecureSSLConnectionSocketFactory()
+                throws KeyManagementException, NoSuchAlgorithmException {
+            final TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    @Override
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+ 
+                    @Override
+                    public void checkClientTrusted(
+                            final java.security.cert.X509Certificate[] arg0, final String arg1)
+                            throws CertificateException {
+                        // do nothing and blindly accept the certificate
+                    }
+ 
+                    @Override
+                    public void checkServerTrusted(
+                            final java.security.cert.X509Certificate[] arg0, final String arg1)
+                            throws CertificateException {
+                        // do nothing and blindly accept the server
+                    }
                 }
-            }
-            if (response.getStatusLine().getStatusCode() != 200) {
-                client.close();
-                return null;
-            }
-
-            client.close();
-            JsonElement el = new JsonParser().parse(result);
-
-            return el;
-        } catch (Exception e) {
-            System.out.println("eeeeeeeeeerrrr================" + e.toString());
-            e.printStackTrace();
-            return null;
+            };
+ 
+            final SSLContext sslcontext = SSLContext.getInstance("SSL");
+            sslcontext.init(null, trustAllCerts,
+                    new java.security.SecureRandom());
+ 
+            final SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                    sslcontext, new String[]{"TLSv1.2"}, null,
+                    SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+ 
+            return sslsf;
         }
     }
-
-    public static JsonObject getjson(String ss, HttpServletRequest request) {
+ 
+ static HttpClient getHttpClient() throws Exception {
+        RequestConfig.Builder requestBuilder = RequestConfig.custom();
+ 
+        HttpClientBuilder builder = HttpClientBuilder.create();
+        builder.setDefaultRequestConfig(requestBuilder.build());
+        builder.setSSLSocketFactory(SSLUtil.getInsecureSSLConnectionSocketFactory());
+        HttpClient httpClient = builder.build();
+        return httpClient;
+    }
+    
+    
+   
+    public static String getResult(String ss, HttpServletRequest request) {
         String addr = "https://ptmsg.pasha-insurance.az/send/message";
-        HttpPost http = new HttpPost(addr);
-        System.out.println(ss);
-        StringEntity entity = new StringEntity(ss, StandardCharsets.UTF_8);
-        http.setEntity(entity);
-        JsonElement el = request(http, request, true);
-        return el.getAsJsonObject();
+         try {
+             return sendPOST(addr, ss);
+             
+         } catch (Exception e) {
+             e.printStackTrace();
+             return e.toString();
+         }
+        
+       
 
     }
 }

@@ -297,42 +297,50 @@ public class mainService extends HttpServlet {
                 String smstext = tools.functions.jsonget(job, "smstext");
                 System.out.println("smstext=" + smstext);
 
-                String qwr = "insert into messages_log (usernumber,bnumber,template_id,text,agentname)values('" + usernumber + "','" + bnumber + "','" + template_id + "','" + smstext + "','" + agent + "') returning id";
-                System.out.println("qwr=" + qwr);
-
-                ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
-                String ss;
-                if (s2.size() > 0) {
-                    ss = "{\n\"command\":\"sendsms\",\n"
-                            + "\"result\":\"ok\"\n}";
-
-                } else {
-                    ss = "{\n\"command\":\"sendsms\",\n"
-                            + "\"result\":\"notSaved\"\n}";
-                }
-                System.out.println("ss=" + ss);
-                response.getWriter().write(ss);
-
-                JsonObject ob = null;
+                ///// send sms
+                String ob = null;
                 Date date = new Date();
-                SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 System.out.println(formatter.format(date));
-                String ddt=date.toString();
-
+//                String ddt=date.toString();
+                String ddt = formatter.format(date);
                 String smsbodytext = "{\n"
-                        + "\"Body\":  \"MessageBody\",\n"
+                        + "\"Body\":  \"" + smstext + "\",\n"
                         + "    \"SourceInfo\":  {\n"
-                        + "                       \""+ddt+"\":  \"DateTime\"\n"
+                        + "                       \"Date\":  \"" + ddt + "\"\n"
                         + "                   },\n"
                         + "    \"MessageType\":  \"SMS\",\n"
-                        + "    \"Subject\":  \"" + smstext + "\",\n"
+                        + "    \"Subject\":  \"smssubject\",\n"
                         + "    \"System\":  \"CiscoMedical\",\n"
                         + "    \"Recipients\":  \"" + bnumber + "\"\n"
                         + "}";
                 System.out.println("smsbodytext=" + smsbodytext);
-                ob = tools.SendSMS.getjson(smsbodytext, request);
-                
+                ob = tools.SendSMS.getResult(smsbodytext, request);
 
+                if (ob.equals("Ok")) {
+
+                    String qwr = "insert into messages_log (usernumber,bnumber,template_id,text,agentname)values('" + usernumber + "','" + bnumber + "','" + template_id + "','" + smstext + "','" + agent + "') returning id";
+                    System.out.println("qwr=" + qwr);
+
+                    ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
+                    String ss;
+                    if (s2.size() > 0) {
+                        ss = "{\n\"command\":\"sendsms\",\n"
+                                + "\"result\":\"ok\"\n}";
+
+                    } else {
+                        ss = "{\n\"command\":\"sendsms\",\n"
+                                + "\"result\":\"Message Do Not Sent\"\n}";
+                    }
+                    System.out.println("ss=" + ss);
+                    response.getWriter().write(ss);
+
+                } else {
+                    String ss = "{\n\"command\":\"sendsms\",\n"
+                            + "\"result\":\"Message Do Not Sent\"\n}";
+                    System.out.println("ss=" + ss);
+                    response.getWriter().write(ss);
+                }
             } else if (command.equals("numberlist")) {
 // numberlist
 
