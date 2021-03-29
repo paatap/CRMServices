@@ -223,10 +223,13 @@ public class mainService extends HttpServlet {
                 System.out.println("saveusernumber=" + saveusernumber);
                 String saveagent = tools.functions.jsonget(job, "saveagent");
                 System.out.println("saveagent=" + saveagent);
+                String saveagentmobile = tools.functions.jsonget(job, "saveagentmobile");
+                System.out.println("saveagentmobile=" + saveagentmobile);
                 String savecustomernumber = tools.functions.jsonget(job, "savecustomernumber");
                 System.out.println("savecustomernumber=" + savecustomernumber);
+                
 
-                String qwr = "update user2subscriber set usernumber='" + saveusernumber + "',agentname='" + saveagent + "'where subscribernumber='" + savecustomernumber + "'returning id";
+                String qwr = "update user2subscriber set usernumber='" + saveusernumber + "',agentname='" + saveagent + "', usermobile='" +saveagentmobile+"' where subscribernumber='" + savecustomernumber + "'returning id";
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
@@ -248,7 +251,7 @@ public class mainService extends HttpServlet {
                 System.out.println("usernumber=" + usernumber);
                 String agent = tools.functions.jsonget(job, "agent");
                 System.out.println("agent=" + agent);
-                String qwr = "select usernumber,subscribernumber,agentname from user2subscriber order by subscribernumber";
+                String qwr = "select usernumber,subscribernumber,agentname,usermobile from user2subscriber order by subscribernumber";
                 //  + "-- where agentname='" + agent + "'";
                 System.out.println("qwr=" + qwr);
 
@@ -262,7 +265,8 @@ public class mainService extends HttpServlet {
 
                         ss += "{\"usernumber\":\"" + s22[0] + "\",\n"
                                 + "\"bnumber\":\"" + s22[1] + "\",\n"
-                                + "\"name\":\"" + s22[2] + "\"\n}";
+                                + "\"name\":\"" + s22[2] + "\",\n"
+                                + "\"namemobile\":\"" + s22[3] + "\"\n}";
                         if (i < s2.size()) {
                             ss += ",\n";
 //                            System.out.println("Kuku=" + s22.length);
@@ -317,22 +321,24 @@ public class mainService extends HttpServlet {
                 System.out.println("smsbodytext=" + smsbodytext);
                 ob = tools.SendSMS.getResult(smsbodytext, request);
 
-                if (ob.equals("Ok")) {
+                if (ob.equals("\"Ok\"")) {
 
                     String qwr = "insert into messages_log (usernumber,bnumber,template_id,text,agentname)values('" + usernumber + "','" + bnumber + "','" + template_id + "','" + smstext + "','" + agent + "') returning id";
                     System.out.println("qwr=" + qwr);
 
-                    ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
-                    String ss;
-                    if (s2.size() > 0) {
-                        ss = "{\n\"command\":\"sendsms\",\n"
-                                + "\"result\":\"ok\"\n}";
+                    String s2 = tools.functions.getResult2(qwr, "", "", tools.functions.isnewcompare).toString();
 
-                    } else {
-                        ss = "{\n\"command\":\"sendsms\",\n"
-                                + "\"result\":\"Message Do Not Sent\"\n}";
-                    }
+                    String ss = s2;
+
+//                    if (s2.size() > 0) {
+//
+//                    } else {
+//                        ss = "{\n\"command\":\"sendsms\",\n"
+//                                + "\"result\":\"Message Do Not Sent\"\n}";
+//                    }
                     System.out.println("ss=" + ss);
+                    ss = "{\n\"command\":\"sendsms\",\n"
+                            + "\"result\":\"ok\"\n}";
                     response.getWriter().write(ss);
 
                 } else {

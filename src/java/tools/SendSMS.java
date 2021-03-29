@@ -13,8 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.client.config.RequestConfig;
@@ -58,20 +58,24 @@ public class SendSMS {
 //                + "}";
        
         StringBuilder json = new StringBuilder();
-        System.out.println("smsbodytext" + smsbodytext);
+        System.out.println("smsbodytext==========" + smsbodytext);
 
         json.append(smsbodytext);
 
-        
+         System.out.println("111111111111");
        try{ 
+           System.out.println("222222222");
         post.setEntity(new StringEntity(json.toString()));
+        
         post.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+           System.out.println("444444444");
          HttpClient client = getHttpClient();
-       
+           System.out.println("555555555");
         HttpResponse response = client.execute(post);
         result=EntityUtils.toString(response.getEntity());
-        System.out.println(result);
-    }catch (Exception e) {}
+        
+        System.out.println("7777777777="+result);
+    }catch (Exception e) {e.printStackTrace();}
 //        try ( CloseableHttpClient httpClient = HttpClients.createDefault();  CloseableHttpResponse response = httpClient.execute(post)) {
 //
 //            result = EntityUtils.toString(response.getEntity());
