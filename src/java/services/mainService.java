@@ -227,9 +227,9 @@ public class mainService extends HttpServlet {
                 System.out.println("saveagentmobile=" + saveagentmobile);
                 String savecustomernumber = tools.functions.jsonget(job, "savecustomernumber");
                 System.out.println("savecustomernumber=" + savecustomernumber);
-                
 
-                String qwr = "update user2subscriber set usernumber='" + saveusernumber + "',agentname='" + saveagent + "', usermobile='" +saveagentmobile+"' where subscribernumber='" + savecustomernumber + "'returning id";
+                //               String qwr = "update user2subscriber set usernumber='" + saveusernumber + "',agentname='" + saveagent + "', usermobile='" +saveagentmobile+"' where subscribernumber='" + savecustomernumber + "'returning id";
+                String qwr = "update user2subscriber set agentname='" + saveagent + "' where subscribernumber='" + savecustomernumber + "'returning id";
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
@@ -240,6 +240,132 @@ public class mainService extends HttpServlet {
 
                 } else {
                     ss = "{\n\"command\":\"changecustomer\",\n"
+                            + "\"result\":\"usernotfound\"\n}";
+                }
+                System.out.println("ss=" + ss);
+                response.getWriter().write(ss);
+            } else if (command.equals("addagent")) {
+// addagent
+
+                String agentname = tools.functions.jsonget(job, "saveagent");
+                System.out.println("agentname=" + agentname);
+                String agentmobile = tools.functions.jsonget(job, "saveagentmobile");
+                System.out.println("agentmobile=" + agentmobile);
+                String qwr = "insert into  agents (agentname,agentmobile) values ('" + agentname + "','" + agentmobile + "')returning agentname";
+                System.out.println("qwr=" + qwr);
+                String ss;
+
+                try {
+                    ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
+
+                    if (s2.size() > 0) {
+                        ss = "{\n\"command\":\"addagent\",\n"
+                                + "\"result\":\"ok\"\n}";
+
+                    } else {
+                        ss = "{\n\"command\":\"addagent\",\n"
+                                + "\"result\":\"notsaved\"\n}";
+                    }
+                    System.out.println("ss=" + ss);
+                } catch (Exception e) {
+                    ss = "{\n\"command\":\"addagent\",\n"
+                            + "\"result\":\"notsaved\"\n}";
+
+                }
+                response.getWriter().write(ss);
+            } else if (command.equals("changeagent")) {
+// changeagent
+
+                String agentname = tools.functions.jsonget(job, "saveagent");
+                System.out.println("agentname=" + agentname);
+                String agentmobile = tools.functions.jsonget(job, "saveagentmobile");
+                System.out.println("agentmobile=" + agentmobile);
+                String qwr = "update  agents set agentmobile= '" + agentmobile + "' where agentname='" + agentname + "' returning agentname";
+                System.out.println("qwr=" + qwr);
+
+                ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
+                String ss;
+                if (s2.size() > 0) {
+                    ss = "{\n\"command\":\"changeagent\",\n"
+                            + "\"result\":\"ok\"\n}";
+                } else {
+                    ss = "{\n\"command\":\"changeagent\",\n"
+                            + "\"result\":\"agentnotfound\"\n}";
+                }
+                System.out.println("ss=" + ss);
+                response.getWriter().write(ss);
+            } else if (command.equals("deleteagent")) {
+// deleteagent
+
+                String agentname = tools.functions.jsonget(job, "saveagent");
+                System.out.println("agentname=" + agentname);
+                String qwr = "update  agents set agentactive= false where agentname='" + agentname + "' returning agentname";
+                System.out.println("qwr=" + qwr);
+
+                ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
+                String ss;
+                if (s2.size() > 0) {
+                    ss = "{\n\"command\":\"deleteagent\",\n"
+                            + "\"result\":\"ok\"\n}";
+                } else {
+                    ss = "{\n\"command\":\"deleteagent\",\n"
+                            + "\"result\":\"agentnamenotfound\"\n}";
+                }
+                System.out.println("ss=" + ss);
+                response.getWriter().write(ss);
+            } else if (command.equals("getagents")) {
+// getagents
+
+                String qwr = "select agentname,agentmobile from agents where agentactive=true order by agentname";
+                //  + "-- where agentname='" + agent + "'";
+                System.out.println("qwr=" + qwr);
+
+                ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
+                String ss = "{\n\"command\":\"getagents\",\n";
+                if (s2.size() > 0) {
+                    ss += "\"result\":\"ok\",\n "
+                            + " \"table\": [\n";
+                    int i = 1;
+                    for (String[] s22 : s2) {
+
+                        ss += "{\"agentname\":\"" + s22[0] + "\",\n"
+                                + "\"agentmobile\":\"" + s22[1] + "\"\n}";
+                        if (i < s2.size()) {
+                            ss += ",\n";
+//                            System.out.println("Kuku=" + s22.length);
+//                            System.out.println("i=" + i);
+                        }
+                        System.out.println("i=" + i);
+                        i = i + 1;
+
+                    }
+                    ss += "\n]\n}";
+                } else {
+                    ss = "{\n\"command\":\"getagents\",\n"
+                            + "\"result\":\"noagents\"\n}";
+                }
+                System.out.println("ss=" + ss);
+                response.getWriter().write(ss);
+            } else if (command.equals("findcustomer")) {
+// findcustomer
+
+                String subscribernumber = tools.functions.jsonget(job, "savecustomernumber");
+                System.out.println("subscribernumber=" + subscribernumber);
+
+                String qwr = "select subscribernumber,agentname from user2subscriber where subscribernumber='" + subscribernumber + "'";
+                //  + "-- where agentname='" + agent + "'";
+                System.out.println("qwr=" + qwr);
+
+                ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
+                String ss = "{\n\"command\":\"findcustomer\",\n";
+                if (s2.size() > 0) {
+                    ss += "\"result\":\"ok\",\n "
+                            + "\"subscribernumber\":\"" + s2.get(0)[0] + "\",\n"
+                            + "\"agentname\":\"" + s2.get(0)[1] + "\"\n}";
+
+                
+                } else {
+                    ss = "{\n\"command\":\"findcustomer\",\n"
                             + "\"result\":\"usernotfound\"\n}";
                 }
                 System.out.println("ss=" + ss);
@@ -394,7 +520,7 @@ public class mainService extends HttpServlet {
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
 
                 String ss = "{\n\"command\":\"getsmstable\",\n";
-                if (s2.size() > 0) {
+                if (s2.size() >= 0) {
                     ss += "\"result\":\"ok\",\n "
                             + " \"smstable\": [\n";
                     int i = 1;
@@ -425,7 +551,7 @@ public class mainService extends HttpServlet {
 
                 String anumber = tools.functions.jsonget(job, "anumber");
                 System.out.println("anumber=" + anumber);
-                String qwr = "select usermobile,agentname from user2subscriber where subscribernumber='" + anumber + "'";
+                String qwr = "select a.agentmobile,u.agentname from user2subscriber u   left join agents a on u.agentname=a.agentname where subscribernumber='" + anumber + "'";
                 System.out.println("qwr=" + qwr);
 
                 ArrayList<String[]> s2 = tools.functions.getResult(qwr, tools.functions.isnewcompare);
